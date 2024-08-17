@@ -15,7 +15,7 @@ The library includes these features:
 To install the library, run:
 
 ```ps
-pip install pysspm
+pip install pysspm-rythia
 ```
 
 to start using it load up SSPMParser from the library.
