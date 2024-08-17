@@ -147,7 +147,7 @@ class SSPMParser():
         self.noteCount = np.uint32(len(self.Notes)).tobytes() # bytes should be length of 4
         self.markerCount = self.noteCount # nothing changed from last time
 
-        self.Difficulty = self.Difficulty if self.Difficulties.get(self.Difficulty) == None else self.Difficulties.get(self.Difficulty)
+        self.Difficulty = self.Difficulty if self.DIFFICULTIES.get(self.Difficulty) == None else self.DIFFICULTIES.get(self.Difficulty)
         self.Difficulty = self.Difficulty.to_bytes(1, 'little') if isinstance(self.Difficulty, int) else self.Difficulty
 
         metadata = self.lastMs + self.noteCount + self.markerCount + self.Difficulty + b"\x00\x00" + self.containsAudio + self.containsCover + self.requiresMod # level rating Not fully implemented yet 
