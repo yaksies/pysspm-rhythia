@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="pysspm",
+    name="pysspm-rhythia",
     version="0.1.0",  # Initial release version
     author="David Jedlovsky",
     author_email="Dev.DavidJed@gmail.com",
@@ -24,6 +24,6 @@ setup(
             "pytest",
         ],
     },
-    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game"],
+    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game", "pysspm-rhythia"],
     include_package_data=True,
 )

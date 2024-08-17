@@ -1,4 +1,4 @@
-# Pysspm
+# pysspm-rhythia
 
 The official python library dedicated to reading, writing, and modifying the SSPM file format from the video game "Rhythia".
 
