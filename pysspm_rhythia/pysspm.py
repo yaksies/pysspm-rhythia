@@ -47,7 +47,6 @@ class SSPMParser():
     """
 
     INVALID_CHARS = {'/', '\\', ':', '*', '?', '"', '<', '>', '|'}
-    DEFAULT_EXPORT_OFFSET = 0  # ms
     HEADER_SIGNATURE = b'SS+m'
     DEFAULT_VERSION = b'\x02\x00'
     RESERVED_SPACE_V2 = b'\x00\x00\x00\x00'
@@ -62,7 +61,7 @@ class SSPMParser():
     }
 
     def __init__(self):
-        self.export_offset = self.DEFAULT_EXPORT_OFFSET
+        self.export_offset = 0
         self.Header = bytes([ # base header
             0x53, 0x53, 0x2b, 0x6d, # File type signature "SS+M"
             0x02, 0x00, # SSPM format version (0x02 or 0x01) Set to 2 by default
