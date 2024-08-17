@@ -63,7 +63,11 @@ class SSPMParser():
 
     def __init__(self):
         self.export_offset = self.DEFAULT_EXPORT_OFFSET
-        self.header = self._create_default_header()
+        self.Header = bytes([ # base header
+            0x53, 0x53, 0x2b, 0x6d, # File type signature "SS+M"
+            0x02, 0x00, # SSPM format version (0x02 or 0x01) Set to 2 by default
+            0x00, 0x00, 0x00, 0x00, # 4 byte reserved space.
+        ])
         self.cover_image = None
         self.last_ms = None
         self.note_count = None
