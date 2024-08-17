@@ -24,6 +24,6 @@ setup(
             "pytest",
         ],
     },
-    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game"]
+    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game"],
     include_package_data=True,
 )
