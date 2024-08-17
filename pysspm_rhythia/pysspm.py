@@ -406,7 +406,7 @@ class SSPMParser():
         self.songName = self._GetNextVariableString(fileBytes)
 
         for i in range(len(self.mapID)): # getting mapID
-            if self.mapID[i] in self.invalidChars: # Create invalidChars thing
+            if self.mapID[i] in self.INVALID_CHARS: # Create invalidChars thing
                 self.mapID = self.mapID[:i] + '_' + self.mapID[i+1:]
         
         mapperCount = fileBytes.read(2)

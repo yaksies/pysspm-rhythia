@@ -7,13 +7,13 @@ import glob
 
 parser = SSPMParser()
 
-parser.ReadSSPM(r"Test.sspm")
+parser.ReadSSPM("./tests/Test.sspm")
 print(len(parser.Notes))
 print(parser.Notes[1000:1020])
 #parser.mapName = "KOCMOC_MAP_TESTING_SSPMLIB"
-parser.WriteSSPM("Test2.sspm", mapName="KOCMOC_MAP_TESTING_SSPMLIB")
+parser.WriteSSPM("./tests/Test2.sspm", mapName="KOCMOC_MAP_TESTING_SSPMLIB")
 
-parser.ReadSSPM(r"Test2.sspm") # if we can open it again then its good.
+parser.ReadSSPM("./tests/Test2.sspm") # if we can open it again then its good.
 print("-----------------------")
 print(len(parser.Notes))
 print(parser.Notes[1000:1020])

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pysspm-rhythia",
-    version="0.1.0",  # Initial release version
+    version="0.1.1",  # Initial release version
     author="David Jedlovsky",
     author_email="Dev.DavidJed@gmail.com",
     description="A Python library dedicated to reading, writing, and modifying the Rhythia SSPM file format",
