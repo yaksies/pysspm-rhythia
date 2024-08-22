@@ -2,6 +2,8 @@
 
 The official python library dedicated to reading, writing, and modifying the SSPM file format from the video game "Rhythia".
 
+> ***Note: Any version before 0.1.5 does not work in python.***
+
 ## SSPM libray information
 
 The library includes these features:
@@ -14,14 +16,14 @@ The library includes these features:
 
 To install the library, run:
 
-```ps
+```bash
 pip install pysspm-rythia
 ```
 
-to start using it load up SSPMParser from the library.
+to start using the library, create a python script and load up pysspm.
 
 ```python
-from pysspm import SSPMParser
+from pysspm_rhythia import SSPMParser
 
 
 parser = SSPMParser()
@@ -53,7 +55,7 @@ with open("output.txt", "w") as f:
 11. `Notes`: A list of tuples containing all notes. | Example of what it Notes is: `[(x, y, ms), (x, y, ms), (x, y, ms) . . .]`
 
 ```python
-from pysspm import SSPMParser
+from pysspm_rhythia import SSPMParser
 
 
 parser = SSPMParser()
@@ -77,7 +79,7 @@ with open('sspmfile.sspm', "wb") as f:
 Alternativly, you can pass in arguments into WriteSSPM function directly
 
 ```py
-from pysspm import SSPMParser
+from pysspm_rhythia import SSPMParser
 
 parser = SSPMParser()
 parser.ReadSSPM("*.sspm")
@@ -91,7 +93,7 @@ parser.WriteSSPM('./SSPMFile.sspm', mappers=mappers)
 This shows the more advanced things you can do by giving examples of custom written code.
 
 ```python
-from pysspm import SSPMParser()
+from pysspm_rhythia import SSPMParser()
 from random import randint
 
 parser = SSPMParser()
@@ -215,7 +217,7 @@ Example of what it Notes is: `[(x, y, ms), (x, y, ms), (x, y, ms) . . .]`
 
 > ***Returns itself***
 
-## Roadmap
+## Roadmap (May get completed)
 
 TODO: (In order of priority)
 
@@ -229,7 +231,8 @@ TODO: (In order of priority)
 - support multiple version of sspm
 - add custom block support in loading
 - Drop numpy dependency
+- Implement Extras difficulty calc
 
 Made with 💖 by DigitalDemon (David Jed)
 
->Documentation last updated: `2024-08-17` | `V0.1.0`
+>Documentation last updated: `2024-08-21` | `V0.1.6`

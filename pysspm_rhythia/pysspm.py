@@ -598,6 +598,8 @@ class SSPMParser():
 
 
 
+
+
 """    def _GetNextVariableString(self, data: BinaryIO, fourbytes: bool = False) -> str:
         length = data.read(2)
         length = length.rstrip("\x00")
