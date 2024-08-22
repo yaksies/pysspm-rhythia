@@ -122,8 +122,6 @@ else:
 
 > Code shows off how hashes are calculated to prevent changes between levels. Could be used for security and integrity of the notes.
 
-***In 0.1.5 and above, a new function, calcHash will be added***
-
 *More advanced documentation will be added in the near future...*
 
 ## Function Documentation
@@ -163,6 +161,8 @@ self.notes = [
  (1.22521, 0.156781, 2000)
 ]#...
 ```
+
+***Notes can sometimes be unordered***
 
 <br>
 
@@ -232,6 +232,7 @@ TODO: (In order of priority)
 - add custom block support in loading
 - Drop numpy dependency
 - Implement Extras difficulty calc
+- Implement simple note ordering function
 
 Made with 💖 by DigitalDemon (David Jed)
 
