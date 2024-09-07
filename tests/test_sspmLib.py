@@ -2,10 +2,12 @@ from pysspm_rhythia import SSPMParser
 import pandas as pd
 import glob
 
-
-# W.I.P
-
-parser = SSPMParser()
+#parser = SSPMParser()
+SHAREDNOTES = [(1, 1, 500), (0, 1, 250), (2, 0, 1500)]
+with open("./tests/TestSong.mp3", "rb") as f:
+    SHAREDAUDIO = f.read()
+with open("./tests/TestCover.png", "rb") as f:
+    SHAREDCOVER = f.read()
 
 # function for using pytest
 def test_read_sspm(): # Basic reading of sspm file format
@@ -26,14 +28,45 @@ def test_write_sspm(): # Writing a new SSPM file from parsed notes
     assert first.Notes == second.Notes
     print("Notes checked")
     assert first.lastMs == second.lastMs
+    print("lastMs checked")
     assert first.coverBytes == second.coverBytes
-    
-# This last test starts from scratch, and applies all the values into the write function.
-def test_write_sspm_from_scratch(): # Writing a new SSPM file from scratch
-    parser = SSPMParser()
-    parser.ReadSSPM("./tests/Test.sspm")
+    print("coverBytes checked")
 
-# Read the SSPM file and parse it into a list of notes.
+# This last test starts from scratch, and applies all the values into the write function.
+def test_write_sspm_from_scratch_no_cover(): # Writing a new SSPM file from scratch
+    parser = SSPMParser()
+    parser.WriteSSPM("./tests/test_write.sspm", coverImage=None, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write.sspm")
+
+def test_write_sspm_from_scratch_no_audio(): # Writing a new SSPM file from scratch
+    parser = SSPMParser()
+    parser.WriteSSPM("./tests/test_write.sspm", coverImage=SHAREDCOVER, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write.sspm")
+
+def test_write_sspm_from_scratch_no_cover_audio(): # Writing a new SSPM file from scratch
+    parser = SSPMParser()
+    parser.WriteSSPM("./tests/test_write.sspm", coverImage=None, audioBytes=None, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write.sspm")
+
+def test_EXTRAS_conversion():
+    parser = SSPMParser()
+    first = parser.ReadSSPM("./tests/test_write.sspm")
+    notes_text = first.NOTES2TEXT()
+    print(notes_text)
+    assert notes_text == ",1|1|500,0|1|250,2|0|1500" # (1, 1, 500), (0, 1, 250), (2, 0, 1500)
+
+def test_EXTRAS_PP_Calc_V1():
+    print("W.I.P")
+    assert 1==1
+
+def test_EXTRAS_MappingStyle_Vision():
+    print("W.I.P")
+    assert 1==1
+
+
+"""
+
+# Read the SSPM file and parse it into a list of notes. | old stuff
 parser.ReadSSPM("./tests/Test.sspm")
 print(len(parser.Notes))
 print(parser.Notes[1000:1020])
@@ -44,3 +77,5 @@ parser.ReadSSPM("./tests/Test2.sspm") # if we can open it again then its good.
 print("-----------------------")
 print(len(parser.Notes))
 print(parser.Notes[1000:1020])
+
+"""

@@ -5,6 +5,8 @@ __pycache__/
 
 # Custom .sspm tests
 *.sspm
+*.mp3
+*.png
 
 # C extensions
 *.so
