@@ -15,8 +15,8 @@ def calcObsiidRating(self: SSPMParser, notes: list = None) -> SSPMParser:
     return self
 
 
-def calcPP(self: SSPMParser, notes) -> SSPMParser:
+def calcStarRating(self: SSPMParser, notes) -> float:
     """
-    This calculation method is the method used in rhythia-online.
+    This calculation method is the method used in rhythia-online. | May change in future updates
     """
-    pass
+    return len(self.Notes) / 100 
