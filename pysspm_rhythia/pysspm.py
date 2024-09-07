@@ -65,13 +65,9 @@ class SSPMParser():
             0x00, 0x00, 0x00, 0x00, # 4 byte reserved space.
         ])
         self.lastMs = None
-        self.note_count = None
-        self.marker_count = None
         self.metadata = {}
         self.songName = None
         self.requiresMod = 0
-        self.contains_cover = None
-        self.contains_audio = None
         self.strict = False
         self.coverBytes = None
         self.Difficulty = 0
