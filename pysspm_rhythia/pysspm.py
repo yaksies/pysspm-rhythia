@@ -64,16 +64,22 @@ class SSPMParser():
             0x02, 0x00, # SSPM format version (0x02 or 0x01) Set to 2 by default
             0x00, 0x00, 0x00, 0x00, # 4 byte reserved space.
         ])
-        self.cover_image = None
         self.lastMs = None
         self.note_count = None
         self.marker_count = None
         self.metadata = {}
-        self.song_name = None
-        self.requires_mod = 0
+        self.songName = None
+        self.requiresMod = 0
         self.contains_cover = None
         self.contains_audio = None
         self.strict = False
+        self.coverBytes = None
+        self.Difficulty = 0
+        self.audioBytes = None
+        self.mapName = None
+        self.mappers = None
+        self.Notes = None
+        self.customDataOffset = 0
 
     def _GetNextVariableString(self, data: BinaryIO, fourbytes: bool = False, encoding: str = "ASCII", V2: bool = True) -> str: # Why did this have a self variable??
         # Read 2 bytes for length (assuming little-endian format)
@@ -93,7 +99,7 @@ class SSPMParser():
         If no filepath is passed in, it will return file as bytes
         <br>
         Variables that need to be covered:
-        1. `coverImage`: Cover image in bytes form, or None
+        1. `coverBytes`: Cover image in bytes form, or None
         2. `audioBytes`: Audio in bytes form, or None
         3. `Difficulty`: one of Difficulties dictionary options, or 0x00 - 05 OR "N/A", "Easy", "Medium", "Hard", "Logic", "Tasukete"
         4. `mapName`: The name of the map. Rhythia guidelines suggests `artist name - song name`
@@ -272,12 +278,9 @@ class SSPMParser():
         
         self.lastMs = np.uint32(lastms).tobytes() # because list is not in order.
 
-
-        pointers = b''
-        pointers+=self.customDataOffset+self.customDataLength+self.audioOffset+self.audioLength+self.coverOffset+self.coverLength+self.markerDefinitionsOffset+self.markerDefinitionsLength+self.markerOffset+self.markerLength
-
         if debug:
             print("All pointers finished")
+
 
         # adding everything together
         metadata = self.lastMs + self.noteCount + self.markerCount + self.Difficulty + b"\x00\x00" + self.containsAudio + self.containsCover + self.requiresMod # level rating Not fully implemented yet 
@@ -287,13 +290,16 @@ class SSPMParser():
         self.customDataLength = np.uint64(len(self.customData)).tobytes()
         offset+= len(self.customData)
 
+        
         self.audioOffset = np.uint64(offset).tobytes()
         self.audioLength = np.uint64(len(self.audioBytes)).tobytes() if self.containsAudio == b'\x01' else b'\x00\x00\x00\x00\x00\x00\x00\x00' # 8 bytes filler if no audio length found | Possible bug if no audio found, and reading special block fails. | may default to start of file.
-        offset+= len(self.audioBytes)
+        offset+= len(self.audioBytes) if self.containsAudio == b'\x01' else len(b'\x00\x00\x00\x00\x00\x00\x00\x00') # 8
+        self.audioBytes = b'' if self.audioBytes == None else self.audioBytes
 
         self.coverOffset = np.uint64(offset).tobytes()
         self.coverLength = np.uint64(len(self.coverBytes)).tobytes() if self.containsCover == b'\x01' else b'\x00\x00\x00\x00\x00\x00\x00\x00' # 8 bytes filler if no audio length found 
-        offset+= len(self.coverBytes)
+        offset+= len(self.coverBytes) if self.containsCover == b'\x01' else len(b'\x00\x00\x00\x00\x00\x00\x00\x00') # 8
+        self.coverBytes = b'' if self.coverBytes == None else self.coverBytes
 
         self.NoteDefinition = "ssp_note".encode("ASCII")
         self.NoteDefinitionf = len(self.NoteDefinition).to_bytes(2, 'little') + self.NoteDefinition
@@ -313,6 +319,18 @@ class SSPMParser():
         # hashing
         self.markerSet = self.markerDefinitions+self.Markers
         sHash = sha1(self.markerSet).digest()
+
+        pointers = b''
+        pointers+=self.customDataOffset+self.customDataLength+self.audioOffset+self.audioLength+self.coverOffset+self.coverLength+self.markerDefinitionsOffset+self.markerDefinitionsLength+self.markerOffset+self.markerLength
+
+        if debug:
+            print(self.lastMs)
+            print(metadata)
+            print(pointers)
+            print(self.strings)
+            print(self.customData)
+            print(self.audioBytes[0:10])
+            print(self.coverBytes[0:10])
 
         self.SSPMData = self.Header+sHash+metadata+pointers+self.strings+self.customData+self.audioBytes+self.coverBytes+self.markerDefinitions+self.Markers
         

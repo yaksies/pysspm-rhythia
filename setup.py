@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pysspm-rhythia",
-    version="0.1.5",
+    version="0.2.0",
     author="David Jedlovsky",
     author_email="Dev.DavidJed@gmail.com",
     description="A Python library dedicated to reading, writing, and modifying the Rhythia SSPM file format",
@@ -24,6 +24,6 @@ setup(
             "pytest",
         ],
     },
-    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game", "pysspm-rhythia"],
+    keywords=["Rhythia", "Sound space", "SSPM", "Rhythm game", "pysspm-rhythia", "pysspm"],
     include_package_data=True,
 )
