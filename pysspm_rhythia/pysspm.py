@@ -1,5 +1,6 @@
 from io import BytesIO
 from hashlib import sha1
+from types import NoneType
 from typing import BinaryIO
 import numpy as np
 from warnings import warn
@@ -89,7 +90,7 @@ class SSPMParser():
         
         return finalString.decode(encoding=encoding)
     
-    def WriteSSPM(self, filename: str = None, forcemapid=False, debug: bool = False, **kwargs) -> bytearray | None:
+    def WriteSSPM(self, filename: str = None, forcemapid=False, debug: bool = False, **kwargs) -> bytearray | NoneType:
         """
         Creates a SSPM v2 file based on variables passed in, or already set. <br>
         If no filepath is passed in, it will return file as bytes
