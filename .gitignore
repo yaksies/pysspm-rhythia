@@ -8,6 +8,10 @@ __pycache__/
 *.mp3
 *.png
 
+# tests
+classificationtest.txt
+guide.md
+
 # C extensions
 *.so
 
