@@ -6,11 +6,16 @@ The official python library dedicated to reading, writing, and modifying the SSP
 
 ## SSPM libray information
 
-The library includes these features:
+The main library includes these features:
 
 > 1. Reading .SSPM files
 > 2. Modifying SSPM data
 > 3. Writing .SSPM files
+
+Extras:
+
+> 1. Difficulty Calculation (W.I.P)
+> 2. Note Classification (semi-stable)
 
 ## How to install/use
 
@@ -93,7 +98,7 @@ parser.WriteSSPM('./SSPMFile.sspm', mappers=mappers)
 This shows the more advanced things you can do by giving examples of custom written code.
 
 ```python
-from pysspm_rhythia import SSPMParser()
+from pysspm_rhythia import SSPMParser
 from random import randint
 
 parser = SSPMParser()
@@ -140,8 +145,8 @@ def WriteSSPM(self, filename: str = None, debug: bool = False, **kwargs) -> byte
 
 > Creates a SSPM v2 file based on variables passed in, or already set.
 
-*If no filepath is passed in, it will return file as bytes*
-
+*If no filepath is passed in, it will return file as bytes* <br>
+*Note: current version of pysspm-rhythia requires audio as a parameter for v2 filetype*
 
 **Variables that need to be covered:**
 
@@ -171,7 +176,7 @@ self.notes = [
 Example usage:
 
 ```python
-    from sspmLib import SSPMParser
+    from pysspm_rhythia import SSPMParser
         
     sspm = SSPMParser()
     sspm.ReadSSPM("*.sspm") # reads
@@ -196,8 +201,6 @@ def ReadSSPM(self, file: str | BinaryIO, debug: bool = False):
 
 ***SSPM (Sound space plus map file) version 1 is not supported at this time. loading this file may raise errors***
 
-
-
 #### Returns
 
 1. `coverBytes` if cover was found
@@ -213,7 +216,6 @@ def ReadSSPM(self, file: str | BinaryIO, debug: bool = False):
 11. `Notes`: A list of tuples containing all notes.
 
 Example of what it Notes is: `[(x, y, ms), (x, y, ms), (x, y, ms) . . .]`
-
 
 > ***Returns itself***
 
@@ -236,4 +238,4 @@ TODO: (In order of priority)
 
 Made with 💖 by DigitalDemon (David Jed)
 
->Documentation last updated: `2024-08-21` | `V0.1.6`
+> Documentation last updated: `2024-09-27` | `V0.2.1`
