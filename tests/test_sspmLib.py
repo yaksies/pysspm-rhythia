@@ -52,22 +52,22 @@ def test_read_write_sspm(): # Writing a new SSPM file from parsed notes
 # This last test starts from scratch, and applies all the values into the write function.
 def test_write_sspm_from_scratch_no_cover(): # Writing a new SSPM file from scratch
     parser = SSPMParser()
-    parser.WriteSSPM("./tests/test_write.sspm", coverBytes=None, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
-    parser.ReadSSPM("./tests/test_write.sspm")
+    parser.WriteSSPM("./tests/test_write_n_cover.sspm", coverBytes=None, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write_n_cover.sspm")
 
 def test_write_sspm_from_scratch_no_audio(): # Writing a new SSPM file from scratch
     parser = SSPMParser()
-    parser.WriteSSPM("./tests/test_write.sspm", coverBytes=SHAREDCOVER, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
-    parser.ReadSSPM("./tests/test_write.sspm")
+    parser.WriteSSPM("./tests/test_write_n_audio.sspm", coverBytes=SHAREDCOVER, audioBytes=SHAREDAUDIO, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write_n_audio.sspm")
 
 def test_write_sspm_from_scratch_no_cover_audio(): # Writing a new SSPM file from scratch
     parser = SSPMParser()
-    parser.WriteSSPM("./tests/test_write.sspm", coverBytes=None, audioBytes=None, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
-    parser.ReadSSPM("./tests/test_write.sspm")
+    parser.WriteSSPM("./tests/test_write_n_audio_cover.sspm", coverBytes=None, audioBytes=None, Difficulty="N/A", mapName="Test run level", mappers=["Test_Pysspm_Rhythia", "Test"], Notes=SHAREDNOTES)
+    parser.ReadSSPM("./tests/test_write_n_audio_cover.sspm")
 
 def test_EXTRAS_conversion():
     parser = SSPMParser()
-    first = parser.ReadSSPM("./tests/test_write.sspm")
+    first = parser.ReadSSPM("./tests/test_write_n_audio_cover.sspm")
     notes_text = first.NOTES2TEXT()
     print(notes_text)
     assert notes_text == ",0|1|250,1|1|500,2|0|1500" # UPDATED: now automatically sorts by time
