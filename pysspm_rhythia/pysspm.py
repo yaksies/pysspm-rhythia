@@ -140,8 +140,8 @@ class SSPMParser():
         ])
 
         # configs
-        self.containsCover = b"\x01" if self.coverBytes else b"\x00" # 0 or 1
-        self.containsAudio = b"\x01" if self.audioBytes else b"\x00" # 0 or 1
+        self.containsCover = b"\x01" if self.coverBytes != None else b"\x00" # 0 or 1
+        self.containsAudio = b"\x01" if self.audioBytes != None else b"\x00" # 0 or 1
         self.requiresMod = b"\x01" if self.requiresMod == 1 or self.requiresMod == b"\x01" else b"\x00" # Who actually uses this though?
         
         #print(self.Notes[-1][2])
@@ -586,7 +586,7 @@ class SSPMParser():
 
             Notes.append((xF, yF, msF)) # F = converted lol
 
-        self.Notes = Notes
+        self.Notes = sorted(Notes, key=lambda n: n[2]) # Sort by time
         self.isQuantum = isQuantumChecker
 
         return self
