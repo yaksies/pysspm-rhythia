@@ -1,6 +1,7 @@
 """
 Collection of items I created that I thought I might import into the library in case anyone finds them useful
 """
+from types import NoneType
 import numpy as np
 from collections import defaultdict
 import math
@@ -35,8 +36,48 @@ def calcStarRating(self: SSPMParser) -> float:
     - apply exponential decay (of some sorts)
     """
 
+class ClassifiedNote: # 
+    def __init__(self, x: float | int, y: float | int, ms: int, note: tuple = None, hyp: float | int = None, vector: tuple = None, classifications: tuple = None) -> NoneType:
+        """_WORK IN PROGRESS_
+
+        Args:
+            x (float | int): _x value of the map note_
+            y (float | int): _y value of the map note_
+            ms (int): _milisecond value of the map note_
+            note (tuple, optional): _tuple form of notes | overrides x, y, ms if used_. Defaults to None.
+            hyp (float | int, optional): _hypotenuse of 2 points_. Defaults to None.
+            vector (tuple, optional): _vector class done from classifications_. Defaults to None.
+            classifications (tuple, optional): _classifications of notetype_. Defaults to None.
+
+        Returns:
+            NoneType: _description_
+        """
+
+        self.NOTECLASSES = {
+            "spiral": ("broken-spiral", "short-slide", "medium-slide", "s-slide", "o-slide"),
+            "jumpstream": ("tech", "vibro", "long-jump", "short-jump", "sidesteps", "corner-jumps", "star-jump", "rotate-jumps", "pinjumps"), # star-jump = octagram
+            "misc": ("stack", "meganote", "quantum", "offgrid")
+            }
+
+        self.x = x if note is not None else note[0]
+        self.y = ms if note is not None else note[1]
+        self.ms = ms if note is not None else note[2]
+
+        self.dx = 0 if vector is None else vector[0]
+        self.dy = 0 if vector is None else vector[1]
+        self.dt = 0 if vector is None else vector[2]
+        self.dh = hyp if vector is None else vector[3]
+
+        self.classifications = classifications
+
 class NoteClassifier:
     def __init__(self, notes, time_multiplier=5):
+        """_WORK IN PROGRESS_
+
+        Args:
+            notes (_type_): _description_
+            time_multiplier (int, optional): _description_. Defaults to 5.
+        """
         self.notes = sorted(notes, key=lambda n: n[2])  # Sort by time
         self.time_multiplier = time_multiplier
         self.vectors = self.compute_vectors()
@@ -177,7 +218,7 @@ if __name__ == "__main__":
     from pysspm_rhythia import SSPMParser
 
     parser = SSPMParser()
-    parser.ReadSSPM(r"C:/Users/david/AppData/Roaming/SoundSpacePlus/maps/Rhythia-Gen_DigitalDemon_AITEST_-_DAI_V3.sspm")
+    parser.ReadSSPM(r"C:/Users/user/AppData/Roaming/SoundSpacePlus/maps/Rhythia-Gen_DigitalDemon_AITEST_-_DAI_V3.sspm")
 
     classifier = NoteClassifier(parser.Notes, time_multiplier=1)
     patterns = classifier.classify_patterns()
