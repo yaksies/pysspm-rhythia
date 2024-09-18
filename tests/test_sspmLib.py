@@ -70,7 +70,7 @@ def test_EXTRAS_conversion():
     first = parser.ReadSSPM("./tests/test_write.sspm")
     notes_text = first.NOTES2TEXT()
     print(notes_text)
-    assert notes_text == ",1|1|500,0|1|250,2|0|1500" # (1, 1, 500), (0, 1, 250), (2, 0, 1500)
+    assert notes_text == ",0|1|250,1|1|500,2|0|1500" # UPDATED: now automatically sorts by time
 
 def test_EXTRAS_PP_Calc_V1():
     print("W.I.P")
