@@ -36,8 +36,21 @@ def calcStarRating(self: SSPMParser) -> float:
     - apply exponential decay (of some sorts)
     """
 
-class ClassifiedNote: # 
-    def __init__(self, x: float | int, y: float | int, ms: int, note: tuple = None, hyp: float | int = None, vector: tuple = None, classifications: tuple = None) -> NoneType:
+class Note:
+    NOTECLASSES = {
+        "spiral": ("broken-spiral", "short-slide", "medium-slide", "s-slide", "o-slide"), # cannot be jumpstream
+        "jumpstream": ("tech", "vibro", "long-jump", "short-jump", "sidesteps", "corner-jumps", "star-jump", "rotate-jumps", "pinjumps"), # cannot be spiral
+        "misc": ("stack", "meganote", "quantum", "offgrid") # fits under both spiral and jumpstream
+    }
+
+    def __init__(self, 
+                 x: float | int = None, 
+                 y: float | int = None, 
+                 ms: int = None, 
+                 note: tuple = None, 
+                 hyp: float | int = None, 
+                 vector: tuple = None, 
+                 classifications: list = []) -> None:
         """_WORK IN PROGRESS_
 
         Args:
@@ -50,27 +63,38 @@ class ClassifiedNote: #
             classifications (tuple, optional): _classifications of notetype_. Defaults to None.
 
         Returns:
-            NoneType: _description_
+            None: _description_
         """
+        
 
-        self.NOTECLASSES = {
-            "spiral": ("broken-spiral", "short-slide", "medium-slide", "s-slide", "o-slide"),
-            "jumpstream": ("tech", "vibro", "long-jump", "short-jump", "sidesteps", "corner-jumps", "star-jump", "rotate-jumps", "pinjumps"), # star-jump = octagram
-            "misc": ("stack", "meganote", "quantum", "offgrid")
-            }
+        
+        # Set x, y, ms based on note tuple or defaults
+        if note is not None:
+            self.x, self.y, self.ms = note
+        else:
+            self.x = x
+            self.y = y
+            self.ms = ms
+        
+        # Set vector components (dx, dy, dt, dh)
+        if vector is not None:
+            self.dx, self.dy, self.dt, self.dh = vector
+        else:
+            self.dx = self.dy = self.dt = self.dh = 0
 
-        self.x = x if note is not None else note[0]
-        self.y = ms if note is not None else note[1]
-        self.ms = ms if note is not None else note[2]
-
-        self.dx = 0 if vector is None else vector[0]
-        self.dy = 0 if vector is None else vector[1]
-        self.dt = 0 if vector is None else vector[2]
-        self.dh = hyp if vector is None else vector[3]
-
+        self.note = (self.x, self.y, self.ms)
+        # Classifications
         self.classifications = classifications
 
-class NoteClassifier:
+
+
+class NoteClassifier():
+    NOTECLASSES = {
+        "spiral": ("broken-spiral", "short-slide", "medium-slide", "s-slide", "o-slide"), # cannot be jumpstream
+        "jumpstream": ("tech", "vibro", "long-jump", "short-jump", "sidesteps", "corner-jumps", "star-jump", "rotate-jumps", "pinjumps"), # cannot be spiral
+        "misc": ("stack", "meganote", "quantum", "offgrid") # fits under both spiral and jumpstream
+    }
+
     def __init__(self, notes, time_multiplier=5):
         """_WORK IN PROGRESS_
 
@@ -80,122 +104,141 @@ class NoteClassifier:
         """
         self.notes = sorted(notes, key=lambda n: n[2])  # Sort by time
         self.time_multiplier = time_multiplier
-        self.vectors = self.compute_vectors()
+        self.NoteData = self.compute_vectors()
         #print(self.vectors[0:500])
 
         self.patterns = []
         #self.classified_notes = set()
 
     def classify_patterns(self):
-        self.detect_sequences()
-        return self.patterns
+        NoteData = self.detect_sequences()
+        return NoteData
         #return dict(self.patterns)
 
     def compute_vectors(self):
         """Compute the movement vectors between consecutive notes."""
-        vectors = []
+        NoteData = [Note(note=self.notes[0], vector=None)]
         for i in range(1, len(self.notes)):
             x1, y1, t1 = self.notes[i-1]
             x2, y2, t2 = self.notes[i]
-            vector = (abs(x2 - x1), abs(y2 - y1), abs(t2 - t1), round(math.hypot((x2 - x1), abs(y2 - y1)), 2))# max((x2 - x1), abs(y2 - y1)))#  # |(dx, dy, dt, dxy)| = |(dx, dy, dt, math.sqrt((p*p)+(b*b)))|
-            vectors.append(vector) # last one should always go up but if it doesnt then whatever
-        return vectors
+            vector = (abs(x2 - x1), abs(y2 - y1), abs(t2 - t1), round(math.hypot(abs(x2 - x1), abs(y2 - y1)), 2))# max((x2 - x1), abs(y2 - y1)))#  # |(dx, dy, dt, dxy)| = |(dx, dy, dt, math.sqrt((p*p)+(b*b)))|
+            NoteClass = Note(note=self.notes[i], vector=vector)
+            NoteData.append(NoteClass) # last one should always go up but if it doesnt then whatever
+
+        return NoteData
     
+    def last_ruleset(self, buffer, NoteData):
+        # Check if all notes in the buffer have "jumpstream" classification
+        all_spiral = all("spiral" in note.classifications for note, _ in buffer)
+        #print(all_spiral)
+        all_jumpstream = all("jumpstream" in note.classifications for note, _ in buffer)
+
+        # Apply the rules for short-slide and medium-slide
+        if all_spiral:
+            buffer_length = len(buffer)
+            
+            if buffer_length <= 3:
+                classification = "short-slide"
+                #print("short slide")
+            elif 4 <= buffer_length <= 5:
+                classification = "medium-slide"
+                #print("med slide")
+            else:
+                classification = None
+            
+            # If we determined a valid classification, update NoteData
+            if classification:
+                for note, index in buffer:
+                    # Update the note classification in both buffer and NoteData
+                    #note.classifications.append(classification)
+                    #print(index)
+                    NoteData[index].classifications.append(classification)
+
+        # Return the updated NoteData
+        return NoteData
+
+
     def detect_sequences(self, maxjumpcount=2, maxspiralcount=3):
-        vectors = self.vectors
-        notes = self.notes
+        """
+        Detect sequences of jumpstreams and spirals in NoteData.
+        """
 
-        jumpcount = 0
-        spiralcount = 0
-        brokenspiral = bool
-        vectorBuffer = []
-        detectingJumpstream = None  # Track whether we're detecting jumpstream or spiralstream
+        # For anyone looking through this code. I feel terribly sorry for you.
+        # Changing these parameters even slightly will completely change the output.
+        # The setup currently works (somehow)
+        # If you want to try and fix it, be my guest.
 
-        current_pattern_type = None  # Track the current pattern (jumpstream/spiral)
-        current_pattern_notes = []  # To store the sequence of notes for the current pattern
+        NoteData = self.NoteData  # Notes and vectors
+        #print(NoteData[0].dt)  # testing
+
+        print(len(NoteData))
 
         i = 0
-        while i < len(vectors):
-            dx, dy, dt, dxy = vectors[i]
+        buffer = []
+        clearbuffer = False
+        firstNoteSwitch = False
+        while len(NoteData) > i:
+            Note = None
+            Note = NoteData[i] # easier ref
+            #print(NoteData[i].dt, i)
 
-            if detectingJumpstream is None:
-                detectingJumpstream = dxy > 1  # Set initial detection mode based on dxy
+            # Reset the classifications list for the current note to avoid duplicates
+            Note.classifications = []
 
-            if detectingJumpstream:
-                # We're detecting a jumpstream
-                if dxy > 1.5:
-                    jumpcount += 1
-                    spiralcount = 0
-                elif dxy < 0.1: # stack notes | W.I.P
-                    spiralcount += 1
-                    jumpcount = 0
+            # Classify the note based on its 'dh' value
+            if Note.dh >= 1.4:  # if it's a jump
+                if not firstNoteSwitch:
+                    firstNoteSwitch = True
+                    #NoteData = self.first_ruleset(buffer, NoteData)
+                Note.classifications.append("jumpstream")
+                clearbuffer = True
+            elif Note.dh <= 1.4 and Note.dh > 0.1:
+                if not firstNoteSwitch:
+                    NoteData[i-1].classifications.insert(0, "spiral")
+                    #NoteData = self.first_ruleset(buffer, NoteData)
+                    firstNoteSwitch = True
+                Note.classifications.append("spiral")                
+
+            # misc values
+            if Note.x > 2 or Note.x < 0 or Note.y > 2 or Note.y < 0:
+                Note.classifications.append("offgrid")
+
+            #print(Note.x, Note.x != round(Note.x))
+            if Note.x != round(Note.x) or Note.y != round(Note.y):
+                Note.classifications.append("quantum")
+
+            if Note.dx < 0.1 and Note.dy < 0.1:
+                if Note.dt < 5: # ms
+                    if not firstNoteSwitch:
+                        NoteData[i-1].classifications.append("meganote")
+                        #NoteData = self.first_ruleset(buffer, NoteData)
+                        firstNoteSwitch = True
+
+                    Note.classifications.append("jumpstream") if "jumpstream" in NoteData[i-1].classifications else None
+                    Note.classifications.append("spiral") if "spiral" in NoteData[i-1].classifications else None
+                    Note.classifications.append("meganote")
                 else:
-                    spiralcount += 1
-                    jumpcount = 0
+                    if not firstNoteSwitch:
+                        NoteData[i-1].classifications.append("stack")
+                        #NoteData = self.first_ruleset(buffer, NoteData)
+                        firstNoteSwitch = True
 
-                vectorBuffer.append((dx, dy, dt, dxy))
-                current_pattern_notes.append(notes[i])
-
-                if spiralcount >= maxspiralcount:
-                    # End of a jumpstream and beginning of a spiralstream
-                    self.patterns.append(("jumpstream", current_pattern_notes[:-spiralcount]))
-                    current_pattern_notes = current_pattern_notes[-spiralcount:]  # Move to spiral
-                    vectorBuffer = []
-                    detectingJumpstream = False
-                    brokenspiral = False
-                    jumpcount = 0
-                    spiralcount = 0
-            else:
-                # We're detecting a spiralstream
-                if dxy <= 1.5:
-                    spiralcount += 1
-                    if jumpcount != 0:
-                        brokenspiral = True
-                    if jumpcount != 0 and len(vectorBuffer) < 5: # max slide Ill allow
-                        self.patterns.append(("slide", current_pattern_notes[:-jumpcount]))
-                        current_pattern_notes = current_pattern_notes[-jumpcount:]  # Move to jumpstream
-                        vectorBuffer = []
-                        detectingJumpstream = True
-                        brokenspiral = False
-                        jumpcount = 0
-                        spiralcount = 0
-                    print(jumpcount, vectorBuffer)
-                    jumpcount = 0
-                else:
-                    jumpcount += 1
-                    spiralcount = 0
-
-                vectorBuffer.append((dx, dy, dt, dxy))
-                current_pattern_notes.append(notes[i])
-
-                if jumpcount >= maxjumpcount:
-                    # End of a spiralstream and beginning of a jumpstream
-                    self.patterns.append(("spiral", current_pattern_notes[:-jumpcount]) if not brokenspiral else ("broken_spiral", current_pattern_notes[:-jumpcount]))
-                    current_pattern_notes = current_pattern_notes[-jumpcount:]  # Move to jumpstream
-                    vectorBuffer = []
-                    detectingJumpstream = True
-                    brokenspiral = False
-                    jumpcount = 0
-                    spiralcount = 0
-
-
+                    Note.classifications.append("jumpstream") if "jumpstream" in NoteData[i-1].classifications else None
+                    Note.classifications.append("spiral") if "spiral" in NoteData[i-1].classifications else None
+                    Note.classifications.append("stack") 
+            
+            # Must be last for last_ruleset
+            if clearbuffer:
+                NoteData = self.last_ruleset(buffer, NoteData)
+                buffer = []
+                clearbuffer = False
+                firstNoteSwitch = False
+            buffer.append((NoteData[i], i))
 
             i += 1
 
-        # Add the last detected pattern at the end of the loop
-        if current_pattern_notes:
-            if detectingJumpstream:
-                self.patterns.append(("jumpstream", current_pattern_notes))
-            else:
-                self.patterns.append(("spiral", current_pattern_notes))
-
-        return self.patterns
-    
-    def detect_off_grid(self): # keeping for reference
-        off_grid = [note for note in self.notes if not (isinstance(note[0], int) and isinstance(note[1], int))]
-        if off_grid:
-            self.patterns['off_grid'] = [off_grid]
-            self.classified_notes.update(off_grid)
+        self.NoteData = NoteData
+        return NoteData
 
     """
     def get_pattern_prevalence(self):
@@ -205,68 +248,111 @@ class NoteClassifier:
     """
     
     def get_pattern_prevalence(self):
+        """
+        Calculate the prevalence of each pattern type in the detected patterns.
+        """
         total_notes = sum(len(seq) for _, seq in self.patterns)
+        
+        if total_notes == 0:
+            return {}  # No patterns to calculate prevalence for
+
         pattern_counts = {}
         for pattern, seq in self.patterns:
             if pattern not in pattern_counts:
                 pattern_counts[pattern] = 0
             pattern_counts[pattern] += len(seq)
-        return {pattern: count / total_notes for pattern, count in pattern_counts.items()}
+
+        # Normalize counts by the total number of notes
+        prevalence = {pattern: count / total_notes for pattern, count in pattern_counts.items()}
+
+        return prevalence
+
+# Convert hex color to RGB
+def hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+# Convert RGB to hex
+def rgb_to_hex(rgb_color):
+    return '#{:02x}{:02x}{:02x}'.format(*rgb_color)
+
+# Blend multiple colors by averaging their RGB values
+def blend_colors(colors):
+    rgb_colors = [hex_to_rgb(color) for color in colors]
+    avg_rgb = [sum(x) // len(x) for x in zip(*rgb_colors)]
+    return rgb_to_hex(tuple(avg_rgb))
 
 
 if __name__ == "__main__":
     from pysspm_rhythia import SSPMParser
+    import math
 
+    # Load the SSPM data
     parser = SSPMParser()
-    parser.ReadSSPM(r"C:/Users/user/AppData/Roaming/SoundSpacePlus/maps/Rhythia-Gen_DigitalDemon_AITEST_-_DAI_V3.sspm")
+    parser.ReadSSPM(r"C:/Users/*/AppData/Roaming/SoundSpacePlus/maps/teft2oo_tn-shi_-_contradiction.sspm")
 
+    # Instantiate the classifier
     classifier = NoteClassifier(parser.Notes, time_multiplier=1)
-    patterns = classifier.classify_patterns()
-    print(patterns)
 
-    print("Detected Patterns with Notes:")
+    # Classify patterns
+    patterns = classifier.classify_patterns()
+    print("Detected Patterns:", len(patterns))
+
+    # Write results to a file
     with open("./tests/classificationtest.txt", "w") as f:
-        for pattern_type, sequence in patterns:
-            f.write(f"{pattern_type}:\n")
-            for note in sequence:
-                f.write(f"  {note}\n")
-            f.write(f"Sequence length: {len(sequence)}\n")
+        f.write("Detected Patterns with Notes:\n")
+        for i, note in enumerate(patterns):
+            f.write(f"{i}  {note.note}: {note.classifications}:\n")
+            
+        #f.write(f"Sequence length: {len(patterns)}\n")
+
+        # Total patterns detected
         f.write(f"Total patterns detected: {len(patterns)}\n")
 
-        prevalence = classifier.get_pattern_prevalence()
-        f.write(f"-----------------\n Prevalence: {prevalence}\n")
-        f.write(f"Length of Notes: {len(parser.Notes)}\n")
-        f.write("Length of pattern notes: " + ", ".join([f"{pattern}: {len(set(seq))}" for pattern, seq in patterns]) + "\n")
-        #f.write(f"Total unique classified notes: {len(classifier.classified_notes)}\n\n")
+        # Prevalence of each pattern
+        #prevalence = classifier.get_pattern_prevalence()
+        #f.write(f"-----------------\nPrevalence: {prevalence}\n")
+        #f.write(f"Length of Notes: {len(parser.Notes)}\n")
 
-        f.write("Note classifications:\n")
-        for note in parser.Notes:
-            classifications = [pattern for pattern, seq in patterns if note in seq]
-            f.write(f"  {note}: {', '.join(classifications)}\n")
+        # Pattern sequence lengths
+        #f.write("Length of pattern notes: " + ", ".join([f"{pattern}: {len(set(seq))}" for pattern, seq in patterns]) + "\n")
 
-    print("Prevalence:", prevalence)
-    #print(f"Total notes: {len(parser.Notes)}, Unique classified notes: {len(classifier.classified_notes)}")
+    #rint("Prevalence:", prevalence)
 
-
-    #assert 1==1
-
+    # Color settings and saving to file
     COLORS = {
         "vibro": "#FF0000", 
-        "off_grid": "#FF00FF", 
+        "quantum": "#52EE6A", 
         "star": "#E300E3", 
-        "jumpstream": "#FFFFFF", 
+        "jumpstream": "#FF00FF", 
         "slide": "#FFFF00", 
         "broken_spiral": "#00FF00", 
         "spiral": "#00FFFF",
-        "complex": "#00FF00"
+        "complex": "#00FF00",
+        "stack": "#00E355",
+        "meganote": "#55E300",
+        "offgrid": "#E35500",
+        "short-slide": "#0055E3",
+        "medium-slide": "#E355E3",
     }
 
-    with open(r"C:\Users\david\AppData\Roaming\SoundSpacePlus\colorsets\whatwedidinthedessertvisiontest.txt", "w") as f:
-        f.write(COLORS.get(patterns[0][0], '#000000'))
-        for pattern_type, note_sequence in patterns:
-            # Get the color based on the current pattern type
-            color = COLORS.get(pattern_type, '#000000')
-            
-            # Cycle through the notes in this pattern
-            for note in note_sequence:
-                f.write(f"\n{color}")
+    # Write color-coded output to a file
+    with open(r"C:\Users\*\AppData\Roaming\SoundSpacePlus\colorsets\whatwedidinthedessertvisiontest.txt", "w") as f:
+        # Iterate over all notes
+        for note in patterns:
+            classifications = note.classifications
+            if classifications:
+                # Get all the corresponding colors for the classifications
+                colors = [COLORS.get(classification, '#000000') for classification in classifications]
+                # If there are multiple classifications, blend their colors
+                if len(colors) > 1:
+                    color = blend_colors(colors)
+                else:
+                    color = colors[0]  # Just use the first color if only one classification
+
+                # Write the blended color to the file
+                f.write(f"{color}\n")
+
+
+
+print("finished")
