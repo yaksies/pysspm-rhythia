@@ -33,7 +33,7 @@ Stolen from the SSQE version lol
             return data.ToArray();
 """
 
-class SSPMParser():
+class SSPMParser:
     """
     # SSPM Reader
 
@@ -335,6 +335,7 @@ class SSPMParser():
             with open(filename, 'wb') as f:
                 f.write(self.SSPMData)
             return None
+        
         return self.SSPMData
         
 
@@ -605,7 +606,7 @@ class SSPMParser():
         return textString
 
     
-    def _ProcessSSPMV1(self): # WIP
+    def _ProcessSSPMV1(self): # WIP | AUGHH
         """WORK IN PROGRESS. ONLY SUPPORTS V2 RIGHT NOW..."""
         raise NotImplementedError("Method is still a work in progress. Wait until a new release is out")
         return None
