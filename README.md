@@ -235,7 +235,8 @@ TODO: (In order of priority)
 - Drop numpy dependency
 - Implement Extras difficulty calc
 - Implement simple note ordering function
+- Support for Pheonix Filetype (When I get my hands on the data structure)
 
 Made with 💖 by DigitalDemon (David Jed)
 
-> Documentation last updated: `2024-09-27` | `V0.2.1`
+> Documentation last updated: `2024-09-25` | `V0.2.1`
