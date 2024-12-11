@@ -651,8 +651,6 @@ class SSPMParser:
         self.coverBytes = None
 
         match self.coverType:
-            case 0: # no cover
-                self.containsCover = b"\x00"
             case 2: # PNG
                 self.containsCover = b"\x01"
 
@@ -660,7 +658,7 @@ class SSPMParser:
                 coverLengthtoInt = np.int64(int.from_bytes(self.coverLength, 'little'))
 
                 self.coverBytes = fileBytes.read(coverLengthtoInt)
-            case _: # if 1, format not used anymore
+            case _: # for no cover, or non supported format
                 self.containsCover = b"\x00"
 
         self.audioType = int.from_bytes(fileBytes.read(1), 'little')
