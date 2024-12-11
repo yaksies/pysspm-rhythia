@@ -90,6 +90,18 @@ class SSPMParser:
         
         return finalString.decode(encoding=encoding)
     
+    def _NewLineTerminatedString(self, data: BinaryIO, encoding: str = "ASCII") -> str: # for SSPMv1
+
+        finalString = bytearray()
+        while True:
+            stringbyte = data.read(1) # keep going by one bit
+            if stringbyte == b'\n': # once it reaches a new line, break
+                break
+            finalString.extend(stringbyte)
+        
+        return finalString.decode(encoding=encoding)
+
+    
     def WriteSSPM(self, filename: str = None, forcemapid=False, debug: bool = False, **kwargs) -> bytearray | NoneType:
         """
         Creates a SSPM v2 file based on variables passed in, or already set. <br>
@@ -606,10 +618,111 @@ class SSPMParser:
         return textString
 
     
-    def _ProcessSSPMV1(self): # WIP | AUGHH
-        """WORK IN PROGRESS. ONLY SUPPORTS V2 RIGHT NOW..."""
-        raise NotImplementedError("Method is still a work in progress. Wait until a new release is out")
-        return None
+    def _ProcessSSPMV1(self, fileBytes: BinaryIO):
+        """
+        just going to note, i will be using some of the self variables
+        for compatibility with SSPMv2 (such as containsAudio, etc), and 
+        i will also be formatting theoutput like SSPMv2, such as splitting 
+        mappers by comma to make it into an array
+
+                                                                -fog
+        """
+
+
+        # start of metadata
+
+        self.mapID = self._NewLineTerminatedString(fileBytes).replace(",", "")
+        self.mapName = self._NewLineTerminatedString(fileBytes)
+        self.songName = self.mapName # lol
+        self.mappers = self._NewLineTerminatedString(fileBytes).split(", ") # mappers arent in an array, so i will just split
+
+        self.lastMs = fileBytes.read(4)
+        self.noteCount = fileBytes.read(4)
+        self.Difficulty = fileBytes.read(1)
+
+        # end of metadata
+        
+        # start of file data
+
+        self.coverType = int.from_bytes(fileBytes.read(1), byteorder='little')
+
+        self.containsCover = None
+        self.coverLength = None
+        self.coverBytes = None
+
+        match self.coverType:
+            case 0: # no cover
+                self.containsCover = b"\x00"
+            case 2: # PNG
+                self.containsCover = b"\x01"
+
+                self.coverLength = fileBytes.read(8)
+                coverLengthtoInt = np.int64(int.from_bytes(self.coverLength, 'little'))
+
+                self.coverBytes = fileBytes.read(coverLengthtoInt)
+            case _: # if 1, format not used anymore
+                self.containsCover = b"\x00"
+
+        self.audioType = int.from_bytes(fileBytes.read(1), 'little')
+
+        self.containsAudio = None
+        self.audioLength = None
+        self.audioBytes = None
+
+        match self.audioType:
+            case 0: # no Audio
+                self.containsAudio = b"\x00"
+            case 1: # Audio! :)
+                self.containsAudio = b"\x01"
+
+                self.audioLength = fileBytes.read(8)
+                audioLengthtoInt = int.from_bytes(self.audioLength, 'little')
+
+                self.audioBytes = fileBytes.read(audioLengthtoInt) # must be mp3 or OGG
+
+        # end of file data
+
+        # start of note data
+
+        noteCounttoInt = int.from_bytes(self.noteCount, 'little')
+        Notes = []
+        isQuantumChecker = False
+
+        for i in range(noteCounttoInt):
+            ms = fileBytes.read(4)
+            
+            # i can just copy and paste the rest of this since its the same
+
+            isQuantum = int.from_bytes(fileBytes.read(1), 'little')
+
+            xF = None
+            yF = None
+
+            if isQuantum == 0:
+                x = int.from_bytes(fileBytes.read(1), 'little')
+                y = int.from_bytes(fileBytes.read(1), 'little')
+                xF = x
+                yF = y
+
+            else:
+                isQuantumChecker = True
+
+                x = fileBytes.read(4)
+                y = fileBytes.read(4)
+
+                xF = np.frombuffer(x, dtype=np.float32)[0]
+                yF = np.frombuffer(y, dtype=np.float32)[0]
+            
+            msF = np.uint32(int.from_bytes(ms, 'little'))
+
+            Notes.append((xF, yF, msF))
+
+        
+        self.Notes = sorted(Notes, key=lambda n: n[2]) # Sort by time
+        self.isQuantum = isQuantumChecker
+
+        return self
+        
 
 
 
