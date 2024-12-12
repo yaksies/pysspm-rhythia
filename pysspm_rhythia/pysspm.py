@@ -76,6 +76,7 @@ class SSPMParser:
         self.mapName = None
         self.mappers = None
         self.Notes = None
+        self.mapID = None
         self.customDataOffset = 0
 
     def _GetNextVariableString(self, data: BinaryIO, fourbytes: bool = False, encoding: str = "ASCII", V2: bool = True) -> str: # Why did this have a self variable??
