@@ -229,8 +229,8 @@ TODO: (In order of priority)
 - add loading of sspmV2  ✔️
 - add support for creating sspmV2 ✔️
 - clean up unused variables from @self ✔️
-- add support for sspmv1 loading
-- support multiple version of sspm
+- add support for sspmv1 loading ✔️ (Thank you fogsaturate)
+- support multiple versions of sspm
 - add custom block support in loading
 - Drop numpy dependency
 - Implement Extras difficulty calc
@@ -239,4 +239,4 @@ TODO: (In order of priority)
 
 Made with 💖 by DigitalDemon (David Jed)
 
-> Documentation last updated: `2024-09-25` | `V0.2.1`
+> Documentation last updated: `2024-12-12` | `V0.2.2`
