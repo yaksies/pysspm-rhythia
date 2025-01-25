@@ -5,6 +5,7 @@ from typing import BinaryIO
 import numpy as np
 from warnings import warn
 
+
 # TODO: (In order of priority)
 # Add typing support for library ✔️
 # add proper documentation on github
